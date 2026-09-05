@@ -1,0 +1,28 @@
+{
+  "name": "windlass",
+  "version": "0.1.0",
+  "description": "Pipelines as typed graphs with verifier edges and human gates, run by a runner with no model inside it, every run replayable in the browser.",
+  "type": "module",
+  "bin": {
+    "windlass": "bin/windlass.mjs"
+  },
+  "files": [
+    "bin",
+    "src",
+    "docs",
+    "examples",
+    "LICENSE",
+    "README.md"
+  ],
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "test": "node src/runner.mjs --selftest && node --test tests/viewer.test.mjs",
+    "selftest": "node src/runner.mjs --selftest"
+  },
+  "license": "MIT",
+  "author": "James Lorenz Santos",
+  "dependencies": {},
+  "devDependencies": {}
+}

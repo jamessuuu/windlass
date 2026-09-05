@@ -1,0 +1,373 @@
+{
+  "graph": {
+    "id": "windlass-echo-demo",
+    "version": 1,
+    "cwd": ".",
+    "artifacts_dir": ".",
+    "caps": {
+      "attended": true,
+      "max_wall_minutes": 5,
+      "max_attempts_per_node": 2,
+      "max_usd_total": 1
+    },
+    "env_deny": [],
+    "nodes": [
+      {
+        "id": "seed",
+        "kind": "script",
+        "run": "node -e \"const fs=require('fs');if(!fs.existsSync('state.json'))fs.writeFileSync('state.json',JSON.stringify({count:0}))\"",
+        "produces": [
+          "state.json"
+        ],
+        "timeout_minutes": 1
+      },
+      {
+        "id": "bump",
+        "kind": "script",
+        "run": "node -e \"const fs=require('fs');const s=JSON.parse(fs.readFileSync('state.json','utf8'));s.count++;fs.writeFileSync('state.json',JSON.stringify(s))\"",
+        "produces": [
+          "state.json"
+        ],
+        "timeout_minutes": 1,
+        "on_fail": {
+          "goto": "seed",
+          "max": 2
+        }
+      },
+      {
+        "id": "gate1",
+        "kind": "gate",
+        "question": "state.json has count>=2 — confirm to proceed to finish?",
+        "reads": [
+          "state.json"
+        ],
+        "answer_schema": {
+          "type": "object",
+          "required": [
+            "ok"
+          ],
+          "properties": {
+            "ok": {
+              "type": "boolean"
+            }
+          }
+        },
+        "writes": "gate1-answer.json"
+      },
+      {
+        "id": "finish",
+        "kind": "script",
+        "run": "node -e \"require('fs').writeFileSync('DONE.txt','ARTIFACT'+'-BODY-MARKER-7f3a9c')\"",
+        "produces": [
+          "DONE.txt"
+        ],
+        "timeout_minutes": 1
+      }
+    ],
+    "edges": [
+      {
+        "from": "seed",
+        "to": "bump",
+        "verify": "node -e \"process.exit(require('fs').existsSync('state.json')?0:1)\""
+      },
+      {
+        "from": "bump",
+        "to": "gate1",
+        "verify": "node -e \"process.exit(JSON.parse(require('fs').readFileSync('state.json','utf8')).count>=2?0:1)\""
+      },
+      {
+        "from": "gate1",
+        "to": "finish",
+        "verify": "node -e \"process.exit(JSON.parse(require('fs').readFileSync('gate1-answer.json','utf8')).ok===true?0:1)\""
+      }
+    ]
+  },
+  "state": {
+    "graph_id": "windlass-echo-demo",
+    "run_id": "demo",
+    "started_at": "2026-09-05T11:31:14.256Z",
+    "graph_hash": "sha256:5fa987df2edc65ccfd18b0bc307aa8a25950d6c6348e98747248d6a7db68d421",
+    "status": "done",
+    "halt_reason": null,
+    "current": "finish",
+    "nodes": {
+      "seed": {
+        "status": "done",
+        "attempts": 2,
+        "exit": 0,
+        "ms": 142,
+        "usd": 0,
+        "produced": {
+          "state.json": "sha256:6aea6dfe6561984cdc5c54ead84d47d2cf29e48253ae282aef237404adad4661"
+        }
+      },
+      "bump": {
+        "status": "done",
+        "attempts": 2,
+        "exit": 0,
+        "ms": 135,
+        "usd": 0,
+        "produced": {
+          "state.json": "sha256:57413ce83ee1d989e384dfd3a82c6e2d9052a23c4204706bd2d7df11aa4c2d7c"
+        }
+      },
+      "gate1": {
+        "status": "done",
+        "attempts": 1,
+        "exit": 0,
+        "ms": 0,
+        "usd": 0,
+        "produced": {
+          "gate1-answer.json": "sha256:c3a4ad9c0f3106622e2e2075778e36d6a33b8bd1ef979fcd29aeacb6e6d28518"
+        }
+      },
+      "finish": {
+        "status": "done",
+        "attempts": 1,
+        "exit": 0,
+        "ms": 90,
+        "usd": 0,
+        "produced": {
+          "DONE.txt": "sha256:20210bf8db992578306c8fb7ec35d34e29c14aae315512141a108366ac4ab0f5"
+        }
+      }
+    },
+    "usd_total": 0,
+    "active_ms": 1056,
+    "last_progressed": true
+  },
+  "events": [
+    {
+      "ts": "2026-09-05T11:31:14.259Z",
+      "type": "node-start",
+      "node": "seed",
+      "kind": "script"
+    },
+    {
+      "ts": "2026-09-05T11:31:14.260Z",
+      "type": "command",
+      "node": "seed",
+      "cmd": "node -e \"const fs=require('fs');if(!fs.existsSync('state.json'))fs.writeFileSync('state.json',JSON.stringify({count:0}))\""
+    },
+    {
+      "ts": "2026-09-05T11:31:14.355Z",
+      "type": "produce",
+      "node": "seed",
+      "path": "state.json",
+      "hash": "sha256:618de7d9f46f3f697d827a1b6d84974760d5deda62e4e592adaa3c646602a94c"
+    },
+    {
+      "ts": "2026-09-05T11:31:14.355Z",
+      "type": "exit",
+      "node": "seed",
+      "exit": 0,
+      "ms": 95,
+      "usd": 0
+    },
+    {
+      "ts": "2026-09-05T11:31:14.442Z",
+      "type": "verify",
+      "edge": "seed->bump",
+      "exit": 0,
+      "ms": 87
+    },
+    {
+      "ts": "2026-09-05T11:31:14.443Z",
+      "type": "node-start",
+      "node": "bump",
+      "kind": "script"
+    },
+    {
+      "ts": "2026-09-05T11:31:14.443Z",
+      "type": "command",
+      "node": "bump",
+      "cmd": "node -e \"const fs=require('fs');const s=JSON.parse(fs.readFileSync('state.json','utf8'));s.count++;fs.writeFileSync('state.json',JSON.stringify(s))\""
+    },
+    {
+      "ts": "2026-09-05T11:31:14.536Z",
+      "type": "produce",
+      "node": "bump",
+      "path": "state.json",
+      "hash": "sha256:6aea6dfe6561984cdc5c54ead84d47d2cf29e48253ae282aef237404adad4661"
+    },
+    {
+      "ts": "2026-09-05T11:31:14.536Z",
+      "type": "exit",
+      "node": "bump",
+      "exit": 0,
+      "ms": 93,
+      "usd": 0
+    },
+    {
+      "ts": "2026-09-05T11:31:14.624Z",
+      "type": "verify",
+      "edge": "bump->gate1",
+      "exit": 1,
+      "ms": 88
+    },
+    {
+      "ts": "2026-09-05T11:31:14.625Z",
+      "type": "node-start",
+      "node": "seed",
+      "kind": "script"
+    },
+    {
+      "ts": "2026-09-05T11:31:14.625Z",
+      "type": "command",
+      "node": "seed",
+      "cmd": "node -e \"const fs=require('fs');if(!fs.existsSync('state.json'))fs.writeFileSync('state.json',JSON.stringify({count:0}))\""
+    },
+    {
+      "ts": "2026-09-05T11:31:14.767Z",
+      "type": "produce",
+      "node": "seed",
+      "path": "state.json",
+      "hash": "sha256:6aea6dfe6561984cdc5c54ead84d47d2cf29e48253ae282aef237404adad4661"
+    },
+    {
+      "ts": "2026-09-05T11:31:14.767Z",
+      "type": "exit",
+      "node": "seed",
+      "exit": 0,
+      "ms": 142,
+      "usd": 0
+    },
+    {
+      "ts": "2026-09-05T11:31:14.859Z",
+      "type": "verify",
+      "edge": "seed->bump",
+      "exit": 0,
+      "ms": 91
+    },
+    {
+      "ts": "2026-09-05T11:31:14.860Z",
+      "type": "node-start",
+      "node": "bump",
+      "kind": "script"
+    },
+    {
+      "ts": "2026-09-05T11:31:14.861Z",
+      "type": "command",
+      "node": "bump",
+      "cmd": "node -e \"const fs=require('fs');const s=JSON.parse(fs.readFileSync('state.json','utf8'));s.count++;fs.writeFileSync('state.json',JSON.stringify(s))\""
+    },
+    {
+      "ts": "2026-09-05T11:31:14.996Z",
+      "type": "produce",
+      "node": "bump",
+      "path": "state.json",
+      "hash": "sha256:57413ce83ee1d989e384dfd3a82c6e2d9052a23c4204706bd2d7df11aa4c2d7c"
+    },
+    {
+      "ts": "2026-09-05T11:31:14.996Z",
+      "type": "exit",
+      "node": "bump",
+      "exit": 0,
+      "ms": 135,
+      "usd": 0
+    },
+    {
+      "ts": "2026-09-05T11:31:15.129Z",
+      "type": "verify",
+      "edge": "bump->gate1",
+      "exit": 0,
+      "ms": 133
+    },
+    {
+      "ts": "2026-09-05T11:31:15.130Z",
+      "type": "node-start",
+      "node": "gate1",
+      "kind": "gate"
+    },
+    {
+      "ts": "2026-09-05T11:31:15.131Z",
+      "type": "gate-request",
+      "node": "gate1",
+      "question": "state.json has count>=2 — confirm to proceed to finish?",
+      "writes": "gate1-answer.json"
+    },
+    {
+      "ts": "2026-09-05T11:31:15.132Z",
+      "type": "halt",
+      "status": "paused",
+      "reason": "gate"
+    },
+    {
+      "ts": "2026-09-05T11:31:22.127Z",
+      "type": "gate-answer",
+      "node": "gate1",
+      "writes": "gate1-answer.json",
+      "answer": {
+        "ok": true
+      }
+    },
+    {
+      "ts": "2026-09-05T11:31:22.464Z",
+      "type": "resume",
+      "node": "gate1"
+    },
+    {
+      "ts": "2026-09-05T11:31:22.466Z",
+      "type": "node-start",
+      "node": "gate1",
+      "kind": "gate"
+    },
+    {
+      "ts": "2026-09-05T11:31:22.467Z",
+      "type": "gate-answer",
+      "node": "gate1",
+      "writes": "gate1-answer.json",
+      "answer": {
+        "ok": true
+      }
+    },
+    {
+      "ts": "2026-09-05T11:31:22.468Z",
+      "type": "exit",
+      "node": "gate1",
+      "exit": 0,
+      "ms": 0,
+      "usd": 0
+    },
+    {
+      "ts": "2026-09-05T11:31:22.558Z",
+      "type": "verify",
+      "edge": "gate1->finish",
+      "exit": 0,
+      "ms": 90
+    },
+    {
+      "ts": "2026-09-05T11:31:22.559Z",
+      "type": "node-start",
+      "node": "finish",
+      "kind": "script"
+    },
+    {
+      "ts": "2026-09-05T11:31:22.559Z",
+      "type": "command",
+      "node": "finish",
+      "cmd": "node -e \"require('fs').writeFileSync('DONE.txt','ARTIFACT'+'-BODY-MARKER-7f3a9c')\""
+    },
+    {
+      "ts": "2026-09-05T11:31:22.648Z",
+      "type": "produce",
+      "node": "finish",
+      "path": "DONE.txt",
+      "hash": "sha256:20210bf8db992578306c8fb7ec35d34e29c14aae315512141a108366ac4ab0f5"
+    },
+    {
+      "ts": "2026-09-05T11:31:22.649Z",
+      "type": "exit",
+      "node": "finish",
+      "exit": 0,
+      "ms": 90,
+      "usd": 0
+    },
+    {
+      "ts": "2026-09-05T11:31:22.649Z",
+      "type": "halt",
+      "status": "done",
+      "reason": null
+    }
+  ]
+}

@@ -1,0 +1,19 @@
+{
+  "node": "gate1",
+  "question": "state.json has count>=2 — confirm to proceed to finish?",
+  "reads": [
+    "state.json"
+  ],
+  "answer_schema": {
+    "type": "object",
+    "required": [
+      "ok"
+    ],
+    "properties": {
+      "ok": {
+        "type": "boolean"
+      }
+    }
+  },
+  "writes": "gate1-answer.json"
+}

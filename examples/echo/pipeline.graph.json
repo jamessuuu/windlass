@@ -1,0 +1,50 @@
+{
+  "id": "echo",
+  "version": 1,
+  "cwd": ".",
+  "artifacts_dir": ".",
+  "caps": {
+    "attended": true,
+    "max_wall_minutes": 5,
+    "max_attempts_per_node": 2,
+    "max_usd_total": 1
+  },
+  "env_deny": [],
+  "nodes": [
+    {
+      "id": "seed",
+      "kind": "script",
+      "run": "node -e \"const fs=require('fs');if(!fs.existsSync('state.json'))fs.writeFileSync('state.json',JSON.stringify({count:0}))\"",
+      "produces": ["state.json"],
+      "timeout_minutes": 1
+    },
+    {
+      "id": "bump",
+      "kind": "script",
+      "run": "node -e \"const fs=require('fs');const s=JSON.parse(fs.readFileSync('state.json','utf8'));s.count++;fs.writeFileSync('state.json',JSON.stringify(s))\"",
+      "produces": ["state.json"],
+      "timeout_minutes": 1,
+      "on_fail": { "goto": "seed", "max": 2 }
+    },
+    {
+      "id": "gate1",
+      "kind": "gate",
+      "question": "state.json has count>=2 — confirm to proceed to finish?",
+      "reads": ["state.json"],
+      "answer_schema": { "type": "object", "required": ["ok"], "properties": { "ok": { "type": "boolean" } } },
+      "writes": "gate1-answer.json"
+    },
+    {
+      "id": "finish",
+      "kind": "script",
+      "run": "node -e \"require('fs').writeFileSync('DONE.txt','ARTIFACT'+'-BODY-MARKER-7f3a9c')\"",
+      "produces": ["DONE.txt"],
+      "timeout_minutes": 1
+    }
+  ],
+  "edges": [
+    { "from": "seed", "to": "bump", "verify": "node -e \"process.exit(require('fs').existsSync('state.json')?0:1)\"" },
+    { "from": "bump", "to": "gate1", "verify": "node -e \"process.exit(JSON.parse(require('fs').readFileSync('state.json','utf8')).count>=2?0:1)\"" },
+    { "from": "gate1", "to": "finish", "verify": "node -e \"process.exit(JSON.parse(require('fs').readFileSync('gate1-answer.json','utf8')).ok===true?0:1)\"" }
+  ]
+}

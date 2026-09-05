@@ -1,0 +1,12 @@
+node_modules/
+*.local
+
+# Run output dirs are local scratch by default (state.json, events.jsonl,
+# replay.json, gate answer files) — except the committed demo run under
+# examples/demo/, which is real evidence and belongs in the repo.
+# examples/echo/ stays pristine: it is the --selftest fixture, and the
+# selftest copies it verbatim (not a clean checkout), so any run output
+# left there would corrupt the fixture's "fresh state" assumptions.
+.graph-runner/
+!examples/demo/.graph-runner/
+!examples/demo/.graph-runner/**

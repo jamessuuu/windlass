@@ -1,0 +1,21 @@
+{
+  "id": "echo-stall",
+  "version": 1,
+  "cwd": ".",
+  "caps": {
+    "attended": true,
+    "max_wall_minutes": 5,
+    "max_attempts_per_node": 2,
+    "max_usd_total": 1
+  },
+  "nodes": [
+    {
+      "id": "slow",
+      "kind": "script",
+      "run": "node -e \"const s=Date.now();while(Date.now()-s<3000){}\"",
+      "produces": [],
+      "timeout_minutes": 0.02
+    }
+  ],
+  "edges": []
+}

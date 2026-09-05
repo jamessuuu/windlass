@@ -1,0 +1,82 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "graph-runner pipeline graph",
+  "description": "Schema for *.graph.json files consumed by graph-runner.mjs. See SPEC.md for the full contract; this file covers structural shape only — DAG-ness, on_fail back-edge bounds, agent prompt-injection scanning, and per-kind field requirements are enforced separately by graph-runner.mjs's semantic validator (JSON Schema alone can't express those cleanly without $ref/if-then-else, which the runner's zero-dependency mini-validator does not implement).",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["id", "version", "caps", "nodes", "edges"],
+  "properties": {
+    "id": { "type": "string", "minLength": 1 },
+    "version": { "type": "integer", "minimum": 1 },
+    "cwd": { "type": "string" },
+    "artifacts_dir": { "type": "string" },
+    "env_deny": { "type": "array", "items": { "type": "string" } },
+    "caps": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["attended", "max_wall_minutes"],
+      "properties": {
+        "attended": { "const": true },
+        "max_wall_minutes": { "type": "integer", "minimum": 1, "maximum": 240 },
+        "max_attempts_per_node": { "type": "integer", "minimum": 1 },
+        "max_usd_per_agent_node": { "type": "number", "minimum": 0 },
+        "max_usd_total": { "type": "number", "minimum": 0 }
+      }
+    },
+    "nodes": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "kind"],
+        "properties": {
+          "id": { "type": "string", "minLength": 1 },
+          "kind": { "enum": ["script", "agent", "gate", "loop"] },
+
+          "run": { "type": "string", "description": "script kind: shell command" },
+          "produces": { "type": "array", "items": { "type": "string" }, "description": "script/agent kind: artifact paths that must exist and be non-empty after the node runs" },
+          "timeout_minutes": { "type": "number", "minimum": 0 },
+
+          "agent": { "type": "string", "description": "agent kind: name under ~/.claude/agents/<name>.md" },
+          "model": { "type": "string" },
+          "prompt_file": { "type": "string", "description": "agent kind: prompt, may reference {{inputs}}/{{produces}} as paths only" },
+          "inputs": { "type": "array", "items": { "type": "string" } },
+          "tools": { "type": "string", "description": "agent kind: comma-separated --tools allowlist" },
+          "max_usd": { "type": "number", "minimum": 0 },
+
+          "question": { "type": "string", "description": "gate kind" },
+          "reads": { "type": "array", "items": { "type": "string" } },
+          "answer_schema": { "type": "object", "description": "gate kind: JSON schema the answer must satisfy" },
+          "writes": { "type": "string", "description": "gate kind: path the validated answer is written to" },
+
+          "config": { "type": "string", "description": "loop kind: path to a loop-runner.mjs config, handed to it verbatim" },
+
+          "optional": { "type": "boolean" },
+          "on_fail": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["goto"],
+            "properties": {
+              "goto": { "type": "string" },
+              "max": { "type": "integer", "minimum": 1 }
+            }
+          }
+        }
+      }
+    },
+    "edges": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["from", "to", "verify"],
+        "properties": {
+          "from": { "type": "string" },
+          "to": { "type": "string" },
+          "verify": { "type": "string", "minLength": 1 }
+        }
+      }
+    }
+  }
+}

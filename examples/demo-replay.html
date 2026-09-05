@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>windlass demo replay</title>
+<meta name="robots" content="noindex,nofollow">
+<style>
+:root{
+  --ink:#16191d; --muted:#5b6570; --rule:#dfe3e8; --bg:#fff;
+  --code-bg:#f6f7f9; --accent:#1f4b73;
+  --ok-bg:#e6f4ea; --ok-fg:#146c2e; --fail-bg:#fdecea; --fail-fg:#a33028;
+  --warn-bg:#fff4e0; --warn-fg:#8a5b00; --muted-bg:#eef0f2; --muted-fg:#5b6570;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{
+  margin:0; background:var(--bg); color:var(--ink);
+  font:16px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+  overflow-wrap:break-word;
+}
+.wrap{max-width:56rem;margin:0 auto;padding:3rem 1.25rem 6rem}
+h1{font-size:1.5rem;margin:0 0 .3em;letter-spacing:-.01em;font-weight:650}
+h2{font-size:1.1rem;margin:2.4em 0 .7em;padding-top:1.2em;border-top:1px solid var(--rule);font-weight:650}
+h2:first-of-type{border-top:0;padding-top:0}
+p{margin:0 0 1em}
+.muted{color:var(--muted)}
+code{background:var(--code-bg);border:1px solid var(--rule);border-radius:3px;padding:.08em .34em;
+  font-size:.86em;font-family:ui-monospace,SFMono-Regular,"SF Mono",Menlo,Consolas,monospace;
+  overflow-wrap:anywhere;word-break:break-word}
+pre.code{background:var(--code-bg);border:1px solid var(--rule);border-radius:6px;padding:.8rem 1rem;
+  overflow-x:auto;margin:0 0 .6em;font:.8rem/1.5 ui-monospace,SFMono-Regular,"SF Mono",Menlo,Consolas,monospace;
+  white-space:pre-wrap;overflow-wrap:anywhere;tab-size:2}
+pre.code code{background:none;border:0;padding:0;font:inherit}
+.banner{border-radius:8px;padding:1rem 1.2rem;margin:1.2rem 0 1.6rem;font-weight:640}
+.banner-ok{background:var(--ok-bg);color:var(--ok-fg)}
+.banner-fail{background:var(--fail-bg);color:var(--fail-fg)}
+.banner-warn{background:var(--warn-bg);color:var(--warn-fg)}
+dl.meta-head{margin:1.2rem 0 0;padding:1rem 1.2rem;border:1px solid var(--rule);border-radius:6px;
+  display:grid;grid-template-columns:max-content 1fr;gap:.45rem 1.1rem;font-size:.93rem}
+dl.meta-head dt{font-weight:640;color:var(--muted);white-space:nowrap}
+dl.meta-head dd{margin:0;overflow-wrap:anywhere}
+@media(max-width:640px){dl.meta-head{grid-template-columns:1fr;gap:0}dl.meta-head dt{margin-top:.5em}}
+.tablewrap{overflow-x:auto;margin:0 0 1em}
+table{border-collapse:collapse;width:100%;font-size:.88rem}
+th,td{text-align:left;padding:.45rem .65rem;border-bottom:1px solid var(--rule);vertical-align:top;overflow-wrap:anywhere}
+th{font-weight:640;white-space:nowrap}
+.badge{display:inline-block;border-radius:999px;padding:.12em .65em;font-size:.78rem;font-weight:640}
+.badge-ok{background:var(--ok-bg);color:var(--ok-fg)}
+.badge-fail{background:var(--fail-bg);color:var(--fail-fg)}
+.badge-warn{background:var(--warn-bg);color:var(--warn-fg)}
+.badge-muted{background:var(--muted-bg);color:var(--muted-fg)}
+details.block{margin:0 0 .9em;border:1px solid var(--rule);border-radius:8px;background:var(--bg)}
+details.block>summary{cursor:pointer;padding:.6rem .9rem;list-style:none;user-select:none;
+  display:flex;flex-wrap:wrap;gap:.5em;align-items:center}
+details.block>summary::-webkit-details-marker{display:none}
+details.block>summary::before{content:"\25BE  ";display:inline-block}
+details.block[open]>summary{border-bottom:1px solid var(--rule)}
+.node-id{font-weight:650}
+.kind-tag{color:var(--muted);font-size:.85rem;border:1px solid var(--rule);border-radius:4px;padding:0 .4em}
+.attempt-tag{color:var(--muted);font-size:.85rem}
+.ts{margin-left:auto;color:var(--muted);font-size:.8rem;white-space:nowrap}
+.field{padding:.7rem .9rem 0}
+.field:last-child{padding-bottom:.7rem}
+.field-label{font-size:.78rem;color:var(--muted);text-transform:uppercase;letter-spacing:.03em;margin-bottom:.25em}
+.field-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:.6rem;padding:.7rem .9rem}
+.control{padding:.5rem .9rem;margin:0 0 .9em;border-left:3px solid var(--rule);font-size:.88rem;color:var(--muted)}
+.control-halt{border-color:var(--fail-fg)}
+.control-resume{border-color:var(--warn-fg)}
+.control-answer{border-color:var(--ok-fg)}
+footer.meta{margin-top:3rem;padding-top:1.1rem;border-top:1px solid var(--rule);color:var(--muted);font-size:.82rem}
+@media(max-width:640px){.wrap{padding:2rem 1rem 4rem}.field-grid{grid-template-columns:1fr}}
+@media print{
+  .wrap{max-width:none;padding:0}
+  details.block{border:1px solid var(--rule);page-break-inside:avoid}
+  details.block>*{display:block !important}
+  table{page-break-inside:avoid}
+  h2{page-break-after:avoid}
+}
+</style>
+</head>
+<body>
+<main class="wrap">
+
+<h1>windlass demo replay</h1>
+<div class="banner banner-ok">DONE — the graph completed.</div>
+<dl class="meta-head"><dt>graph</dt><dd>windlass-echo-demo (v1)</dd><dt>run id</dt><dd>demo</dd><dt>status</dt><dd><span class="badge badge-ok">done</span></dd><dt>halt reason</dt><dd>none</dd><dt>started at</dt><dd>2026-09-05T11:31:14.256Z</dd><dt>last event recorded at</dt><dd>2026-09-05T11:31:22.649Z</dd><dt>active wall time</dt><dd>1.06 s (1056 ms) <span class="muted">(recorded; excludes time paused at a human gate)</span></dd><dt>total cost</dt><dd>$0</dd><dt>current node</dt><dd>finish</dd><dt>nodes / edges declared</dt><dd>4 / 3</dd><dt>events recorded</dt><dd>34</dd></dl>
+<p class="muted">caps declared in graph: attended=true, max_wall_minutes=5, max_attempts_per_node=2, max_usd_total=1</p>
+
+<h2>Nodes (final status)</h2>
+<div class="tablewrap"><table><thead><tr><th>id</th><th>kind</th><th>final status</th><th>attempts</th><th>last exit</th><th>duration</th><th>cost</th></tr></thead><tbody><tr><td><code>seed</code></td><td>script</td><td><span class="badge badge-ok">done</span></td><td>2</td><td>0 (pass)</td><td>142 ms</td><td>$0</td></tr><tr><td><code>bump</code></td><td>script</td><td><span class="badge badge-ok">done</span></td><td>2</td><td>0 (pass)</td><td>135 ms</td><td>$0</td></tr><tr><td><code>gate1</code></td><td>gate</td><td><span class="badge badge-ok">done</span></td><td>1</td><td>0 (pass)</td><td>0 ms</td><td>$0</td></tr><tr><td><code>finish</code></td><td>script</td><td><span class="badge badge-ok">done</span></td><td>1</td><td>0 (pass)</td><td>90 ms</td><td>$0</td></tr></tbody></table></div>
+<h2>Edges (verify commands)</h2>
+<div class="tablewrap"><table><thead><tr><th>from</th><th>to</th><th>verify command</th><th>recorded attempts</th></tr></thead><tbody><tr><td><code>seed</code></td><td><code>bump</code></td><td><pre class="code"><code>node -e "process.exit(require('fs').existsSync('state.json')?0:1)"</code></pre></td><td><div>#1: exit 0 (pass), 87 ms</div><div>#2: exit 0 (pass), 91 ms</div></td></tr><tr><td><code>bump</code></td><td><code>gate1</code></td><td><pre class="code"><code>node -e "process.exit(JSON.parse(require('fs').readFileSync('state.json','utf8')).count&gt;=2?0:1)"</code></pre></td><td><div>#1: exit 1 (fail), 88 ms</div><div>#2: exit 0 (pass), 133 ms</div></td></tr><tr><td><code>gate1</code></td><td><code>finish</code></td><td><pre class="code"><code>node -e "process.exit(JSON.parse(require('fs').readFileSync('gate1-answer.json','utf8')).ok===true?0:1)"</code></pre></td><td><div>#1: exit 0 (pass), 90 ms</div></td></tr></tbody></table></div>
+<h2>Timeline</h2>
+<details class="block" open><summary><span class="node-id"><code>seed</code></span> <span class="kind-tag">script</span> <span class="attempt-tag">attempt 1</span> <span class="badge badge-ok">0 (pass)</span><span class="ts">2026-09-05T11:31:14.259Z</span></summary>
+<div class="field"><div class="field-label">command</div><pre class="code"><code>node -e "const fs=require('fs');if(!fs.existsSync('state.json'))fs.writeFileSync('state.json',JSON.stringify({count:0}))"</code></pre></div>
+<div class="field-grid"><div><div class="field-label">exit code</div>0 (pass)</div><div><div class="field-label">duration</div>95 ms</div><div><div class="field-label">cost</div>$0</div></div>
+<div class="field"><div class="field-label">artifacts produced (hash only, no body)</div><div class="tablewrap"><table><thead><tr><th>path</th><th>sha256</th></tr></thead><tbody><tr><td><code>state.json</code></td><td><code>sha256:618de7d9f46f3f697d827a1b6d84974760d5deda62e4e592adaa3c646602a94c</code></td></tr></tbody></table></div></div>
+<div class="field"><div class="field-label">outgoing edge verify</div><div class="tablewrap"><table><thead><tr><th>edge</th><th>exit</th><th>duration</th></tr></thead><tbody><tr><td><code>seed-&gt;bump</code></td><td>0 (pass)</td><td>87 ms</td></tr></tbody></table></div></div></details>
+<details class="block" open><summary><span class="node-id"><code>bump</code></span> <span class="kind-tag">script</span> <span class="attempt-tag">attempt 1</span> <span class="badge badge-ok">0 (pass)</span><span class="ts">2026-09-05T11:31:14.443Z</span></summary>
+<div class="field"><div class="field-label">command</div><pre class="code"><code>node -e "const fs=require('fs');const s=JSON.parse(fs.readFileSync('state.json','utf8'));s.count++;fs.writeFileSync('state.json',JSON.stringify(s))"</code></pre></div>
+<div class="field-grid"><div><div class="field-label">exit code</div>0 (pass)</div><div><div class="field-label">duration</div>93 ms</div><div><div class="field-label">cost</div>$0</div></div>
+<div class="field"><div class="field-label">artifacts produced (hash only, no body)</div><div class="tablewrap"><table><thead><tr><th>path</th><th>sha256</th></tr></thead><tbody><tr><td><code>state.json</code></td><td><code>sha256:6aea6dfe6561984cdc5c54ead84d47d2cf29e48253ae282aef237404adad4661</code></td></tr></tbody></table></div></div>
+<div class="field"><div class="field-label">outgoing edge verify</div><div class="tablewrap"><table><thead><tr><th>edge</th><th>exit</th><th>duration</th></tr></thead><tbody><tr><td><code>bump-&gt;gate1</code></td><td>1 (fail)</td><td>88 ms</td></tr></tbody></table></div></div></details>
+<details class="block" open><summary><span class="node-id"><code>seed</code></span> <span class="kind-tag">script</span> <span class="attempt-tag">attempt 2</span> <span class="badge badge-ok">0 (pass)</span><span class="ts">2026-09-05T11:31:14.625Z</span></summary>
+<div class="field"><div class="field-label">command</div><pre class="code"><code>node -e "const fs=require('fs');if(!fs.existsSync('state.json'))fs.writeFileSync('state.json',JSON.stringify({count:0}))"</code></pre></div>
+<div class="field-grid"><div><div class="field-label">exit code</div>0 (pass)</div><div><div class="field-label">duration</div>142 ms</div><div><div class="field-label">cost</div>$0</div></div>
+<div class="field"><div class="field-label">artifacts produced (hash only, no body)</div><div class="tablewrap"><table><thead><tr><th>path</th><th>sha256</th></tr></thead><tbody><tr><td><code>state.json</code></td><td><code>sha256:6aea6dfe6561984cdc5c54ead84d47d2cf29e48253ae282aef237404adad4661</code></td></tr></tbody></table></div></div>
+<div class="field"><div class="field-label">outgoing edge verify</div><div class="tablewrap"><table><thead><tr><th>edge</th><th>exit</th><th>duration</th></tr></thead><tbody><tr><td><code>seed-&gt;bump</code></td><td>0 (pass)</td><td>91 ms</td></tr></tbody></table></div></div></details>
+<details class="block" open><summary><span class="node-id"><code>bump</code></span> <span class="kind-tag">script</span> <span class="attempt-tag">attempt 2</span> <span class="badge badge-ok">0 (pass)</span><span class="ts">2026-09-05T11:31:14.860Z</span></summary>
+<div class="field"><div class="field-label">command</div><pre class="code"><code>node -e "const fs=require('fs');const s=JSON.parse(fs.readFileSync('state.json','utf8'));s.count++;fs.writeFileSync('state.json',JSON.stringify(s))"</code></pre></div>
+<div class="field-grid"><div><div class="field-label">exit code</div>0 (pass)</div><div><div class="field-label">duration</div>135 ms</div><div><div class="field-label">cost</div>$0</div></div>
+<div class="field"><div class="field-label">artifacts produced (hash only, no body)</div><div class="tablewrap"><table><thead><tr><th>path</th><th>sha256</th></tr></thead><tbody><tr><td><code>state.json</code></td><td><code>sha256:57413ce83ee1d989e384dfd3a82c6e2d9052a23c4204706bd2d7df11aa4c2d7c</code></td></tr></tbody></table></div></div>
+<div class="field"><div class="field-label">outgoing edge verify</div><div class="tablewrap"><table><thead><tr><th>edge</th><th>exit</th><th>duration</th></tr></thead><tbody><tr><td><code>bump-&gt;gate1</code></td><td>0 (pass)</td><td>133 ms</td></tr></tbody></table></div></div></details>
+<details class="block" open><summary><span class="node-id"><code>gate1</code></span> <span class="kind-tag">gate</span> <span class="attempt-tag">attempt 1</span> <span class="badge badge-warn">paused — waiting on human</span><span class="ts">2026-09-05T11:31:15.130Z</span></summary>
+<div class="field"><div class="field-label">gate question</div><p>state.json has count&gt;=2 — confirm to proceed to finish?</p></div><div class="field"><div class="field-label">answer written to</div><code>gate1-answer.json</code></div><div class="field"><div class="field-label">reads (declared in graph, not read by the viewer)</div><code>state.json</code></div><div class="field"><div class="field-label">answer_schema (declared in graph)</div><pre class="code"><code>{
+  "type": "object",
+  "required": [
+    "ok"
+  ],
+  "properties": {
+    "ok": {
+      "type": "boolean"
+    }
+  }
+}</code></pre></div></details>
+<div class="control control-halt"><span class="ts">2026-09-05T11:31:15.132Z</span> — graph paused, halt reason: <strong>gate</strong></div>
+<div class="control control-answer"><span class="ts">2026-09-05T11:31:22.127Z</span> — a human answered gate <code>gate1</code>: <code>{"ok":true}</code></div>
+<div class="control control-resume"><span class="ts">2026-09-05T11:31:22.464Z</span> — resumed at gate <code>gate1</code></div>
+<details class="block" open><summary><span class="node-id"><code>gate1</code></span> <span class="kind-tag">gate</span> <span class="attempt-tag">attempt 2</span> <span class="badge badge-ok">0 (pass)</span><span class="ts">2026-09-05T11:31:22.466Z</span></summary>
+<div class="field"><div class="field-label">gate answered</div><p>at 2026-09-05T11:31:22.467Z, written to <code>gate1-answer.json</code></p></div><div class="field"><div class="field-label">the answer the human gave</div><pre class="code"><code>{
+  "ok": true
+}</code></pre></div>
+<div class="field-grid"><div><div class="field-label">exit code</div>0 (pass)</div><div><div class="field-label">duration</div>0 ms</div><div><div class="field-label">cost</div>$0</div></div>
+<div class="field"><div class="field-label">outgoing edge verify</div><div class="tablewrap"><table><thead><tr><th>edge</th><th>exit</th><th>duration</th></tr></thead><tbody><tr><td><code>gate1-&gt;finish</code></td><td>0 (pass)</td><td>90 ms</td></tr></tbody></table></div></div></details>
+<details class="block" open><summary><span class="node-id"><code>finish</code></span> <span class="kind-tag">script</span> <span class="attempt-tag">attempt 1</span> <span class="badge badge-ok">0 (pass)</span><span class="ts">2026-09-05T11:31:22.559Z</span></summary>
+<div class="field"><div class="field-label">command</div><pre class="code"><code>node -e "require('fs').writeFileSync('DONE.txt','ARTIFACT'+'-BODY-MARKER-7f3a9c')"</code></pre></div>
+<div class="field-grid"><div><div class="field-label">exit code</div>0 (pass)</div><div><div class="field-label">duration</div>90 ms</div><div><div class="field-label">cost</div>$0</div></div>
+<div class="field"><div class="field-label">artifacts produced (hash only, no body)</div><div class="tablewrap"><table><thead><tr><th>path</th><th>sha256</th></tr></thead><tbody><tr><td><code>DONE.txt</code></td><td><code>sha256:20210bf8db992578306c8fb7ec35d34e29c14aae315512141a108366ac4ab0f5</code></td></tr></tbody></table></div></div></details>
+<div class="control control-halt"><span class="ts">2026-09-05T11:31:22.649Z</span> — graph done, halt reason: <strong>none</strong></div>
+<footer class="meta">Rendered by windlass viewer. This page carries artifact hashes and event data only — no artifact bodies, no client material. Every value above came from replay.json; anything not recorded there is labeled "not recorded", never guessed.</footer>
+
+</main>
+</body>
+</html>
