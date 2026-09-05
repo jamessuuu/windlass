@@ -35,7 +35,17 @@ to it. Nothing here replaces the world guards or the permission floor.
 6. **Replay is a first-class output**: an append-only `events.jsonl` that
    records every command, exit code, duration, cost, and artifact hash —
    and no artifact bodies, so a replay of a client engagement carries no
-   client material.
+   client material. **One deliberate exception, added 2026-09-05: the
+   `gate-answer` event carries the answer VALUE, not just the path it was
+   written to.** A gate answer is control data a human explicitly chose and
+   `answer_schema` constrains — the same class of thing as an exit code, and
+   the one fact a replay of an attended pipeline exists to show. It is
+   redacted leaf by leaf through the same patterns as command text before it
+   is written. The boundary still holds: what a node PRODUCED is a hash, what
+   a human DECIDED is a value. Keep `answer_schema` narrow, because anything
+   it admits is publishable by definition — a schema that accepts free text
+   can accept client material, and then this law is only as strong as the
+   schema.
 7. **Human gates are real stops.** A gate node writes a request file and
    exits 3 (`paused`). The human answers with a small command; the next
    `--resume` continues. No timeout answers a gate.
@@ -161,7 +171,9 @@ node graph-runner.mjs --selftest                         # examples/echo, zero m
 `verify`, `produce`, `gate-request`, `gate-answer`, `halt`, `resume` — each
 with timestamp, node id, command text (secrets-redacted by the same
 concat-built patterns the secret-leak guard uses), exit code, duration, cost,
-artifact hashes. Never artifact bodies.
+artifact hashes. Never artifact bodies. `gate-answer` additionally carries
+`answer`, the schema-validated value the human supplied, redacted at every
+string leaf (design law 6).
 
 `replay.json` = state + events + the graph, with paths relative to cwd. It
 is the input for the replay viewer (project S2); a replay of a client

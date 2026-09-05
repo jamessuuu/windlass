@@ -18,7 +18,7 @@
     "node": ">=22"
   },
   "scripts": {
-    "test": "node src/runner.mjs --selftest && node --test tests/viewer.test.mjs",
+    "test": "node src/runner.mjs --selftest && node --test tests/viewer.test.mjs tests/redaction.test.mjs",
     "selftest": "node src/runner.mjs --selftest"
   },
   "license": "MIT",
