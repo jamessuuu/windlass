@@ -94,6 +94,19 @@ the example below has nothing to spawn, so it is safe either way, but the
 flag is still required because the runner cannot tell in advance that a
 given graph will never reach an agent node.
 
+## Exit codes
+
+| Code | Meaning |
+|---|---|
+| `0` | The run reached the end of the graph, or the command did what it was asked (`validate` found no errors, `view` wrote a page). |
+| `1` | A node failed and the graph has no edge left to try, or `--check` found a violation in a rendered replay. The pipeline has an answer and the answer is no. |
+| `2` | Usage or config error: an unreadable graph file, a node that references an id that does not exist, an edge with no `verify`. Nothing ran. |
+| `3` | **The run stopped and is waiting for you.** Either a gate node paused for a human answer, or a declared cap tripped (`stall`, `budget-while-working`, `cap:attempts`, `cap:wall`, `cap:usd`). Never an error: `state.json` carries `halt_reason`, and `resume` continues from it. |
+
+`3` is the code that matters and the reason the runner exists. A pipeline that
+silently answered its own gate, or quietly looped past its cap, would be
+cheaper to build and worth nothing. Exit 3 is the runner refusing to do that.
+
 ## Worked example
 
 `examples/echo/pipeline.graph.json` is the fixture the selftest uses: four
@@ -115,8 +128,9 @@ windlass replay examples/demo/pipeline.graph.json --run-id demo
 windlass view examples/demo/.graph-runner/demo --out examples/demo-replay.html
 ```
 
-`examples/demo-replay.html` in this repo is the actual output of that
-sequence, not a mock-up. Open it in a browser: it shows the graph's caps,
+The demo, [`examples/demo-replay.html`](examples/demo-replay.html), is the
+actual output of that sequence, not a mock-up. Open it in a browser (it
+fetches nothing, so it works offline): it shows the graph's caps,
 a node-by-node timeline with each command, exit code, duration and cost,
 the two edges that had to fail once before the `bump` node's `on_fail`
 retry sent it back to `seed`, the exact question `gate1` asked, and the
