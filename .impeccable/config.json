@@ -1,0 +1,17 @@
+{
+  "detector": {
+    "ignoreRules": [],
+    "ignoreFiles": [],
+    "ignoreValues": [
+      {
+        "rule": "side-tab",
+        "value": "*",
+        "files": [
+          "site/styles.css"
+        ],
+        "createdAt": "2026-09-06T07:41:48.597Z",
+        "reason": "control-halt/answer/resume: the left border colour encodes replay event state, emitted by src/viewer.mjs and asserted by bin/build-site.mjs. Removing it deletes information, not decoration. User confirmed 2026-09-06."
+      }
+    ]
+  }
+}
