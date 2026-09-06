@@ -40,7 +40,7 @@ New command:
        renders a run's replay (graph + state + events) to one self-contained
        HTML file, then runs the same --check gate the file must pass.
 
-  --selftest    runs the runner's 21-case selftest (examples/echo, zero model calls)
+  --selftest    runs the runner's selftest (examples/echo, zero model calls); prints passed/total
   --version     print the installed windlass version
   --help        this message
 `;

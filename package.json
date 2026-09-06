@@ -18,8 +18,10 @@
     "node": ">=22"
   },
   "scripts": {
-    "test": "node src/runner.mjs --selftest && node --test tests/viewer.test.mjs tests/redaction.test.mjs",
-    "selftest": "node src/runner.mjs --selftest"
+    "test": "node src/runner.mjs --selftest && node --test tests/viewer.test.mjs tests/redaction.test.mjs tests/no-model.test.mjs tests/site.test.mjs",
+    "selftest": "node src/runner.mjs --selftest",
+    "build:site": "node bin/build-site.mjs",
+    "build:assets": "node bin/build-assets.mjs"
   },
   "license": "MIT",
   "author": "James Lorenz Santos",
@@ -29,7 +31,7 @@
     "type": "git",
     "url": "git+https://github.com/jamessuuu/windlass.git"
   },
-  "homepage": "https://github.com/jamessuuu/windlass#readme",
+  "homepage": "https://windlass-runner.vercel.app/",
   "bugs": {
     "url": "https://github.com/jamessuuu/windlass/issues"
   },

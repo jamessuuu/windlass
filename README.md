@@ -1,8 +1,6 @@
 # windlass
 
-Pipelines as typed graphs with verifier edges and human gates, run by a
-runner with no model inside it. Every run is replayable in a browser as one
-static HTML file.
+windlass runs pipelines as typed graphs with verifier edges and human gates, with no model inside the runner, and every run replays as one static HTML file.
 
 A windlass graph is a `*.graph.json` file: a small set of nodes (script,
 agent, gate, loop) connected by edges. Every edge names a `verify` command
@@ -184,3 +182,14 @@ them.
 ## License
 
 MIT, see `LICENSE`.
+
+---
+
+<!-- attribution-kit v1 -->
+<p>
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="docs/brand/agentjames-mark-inv.svg">
+    <img src="docs/brand/agentjames-mark.svg" alt="Agent James" width="24" height="24">
+  </picture>
+  Built by <a href="https://agentjames.vercel.app">James Lorenz Santos</a> · <a href="https://www.linkedin.com/in/james-lorenz-santos-720776251/">LinkedIn</a>
+</p>

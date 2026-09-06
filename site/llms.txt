@@ -1,0 +1,9 @@
+# windlass
+
+> windlass runs pipelines as typed graphs with verifier edges and human gates, with no model inside the runner, and every run replays as one static HTML file.
+
+One page and one artifact. The page leads with what the runner refuses to do and names the test behind each refusal; the artifact is the rendered replay of a real run.
+
+- [The finding, the replay excerpt, and how to reproduce exit code 3](https://windlass-runner.vercel.app/)
+- [Replay of the demo run, one static file](https://windlass-runner.vercel.app/demo-replay)
+- [Source, tests and README](https://github.com/jamessuuu/windlass)

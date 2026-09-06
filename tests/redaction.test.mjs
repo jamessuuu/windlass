@@ -14,7 +14,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
-import { mkdtempSync, copyFileSync, readFileSync, readdirSync, existsSync, writeFileSync } from 'node:fs';
+import { mkdtempSync, mkdirSync, copyFileSync, readFileSync, readdirSync, existsSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -89,6 +89,53 @@ test('the human decision itself still survives, or the replay shows nothing', ()
 
   assert.ok(line, 'no gate-answer event');
   assert.deepEqual(line.answer, { ok: true }, 'the decision the human made was not preserved');
+});
+
+test('negative control: with the redaction removed, the planted token survives, so the first test must fail without it', () => {
+  // The first test in this file was proven to bite once by hand: the
+  // redaction line was deleted, the test failed on "the raw token survived",
+  // and the line was put back (commit 31da960). A proof that lives in a
+  // commit message can be forgotten. This makes it permanent: a copy of the
+  // real runner with exactly that line removed is run through the same
+  // scenario, and the token MUST come out the other side. If it does not,
+  // the passing test above is no longer proving what it claims.
+  const src = readFileSync(RUNNER, 'utf8');
+  const ANCHOR = 'if (entry.answer !== undefined) entry.answer = redactDeep(entry.answer);';
+  assert.equal(
+    src.split(ANCHOR).length - 1, 1,
+    'the redaction line this control removes must appear exactly once in src/runner.mjs; if it moved, move this anchor with it',
+  );
+  const mutated = src.replace(ANCHOR, '/* redaction removed by the negative control in tests/redaction.test.mjs */');
+
+  // A mutant copy of src/, so the original is never touched. schema.json
+  // travels with it because the runner loads it from its own directory.
+  const root = mkdtempSync(join(tmpdir(), 'windlass-mutant-'));
+  mkdirSync(join(root, 'src'));
+  const MUTANT = join(root, 'src', 'runner.mjs');
+  writeFileSync(MUTANT, mutated);
+  copyFileSync(join(HERE, '..', 'src', 'schema.json'), join(root, 'src', 'schema.json'));
+
+  const cwd = join(root, 'run');
+  mkdirSync(cwd);
+  copyFileSync(GRAPH, join(cwd, 'pipeline.graph.json'));
+  const runMutant = (args) => execFileSync(process.execPath, [MUTANT, ...args, '--allow-nested'], {
+    cwd, encoding: 'utf8', env: { ...process.env, CLAUDECODE: '' },
+  });
+
+  try {
+    runMutant(['run', 'pipeline.graph.json']);
+    assert.fail('the mutant did not pause at the gate; removing the redaction must not change control flow');
+  } catch (err) {
+    assert.equal(err.status, 3, `mutant: expected the gate to pause with exit 3, got ${err.status}`);
+  }
+  runMutant(['answer', 'pipeline.graph.json', 'gate1', JSON.stringify({ ok: true, note: `token ${FAKE_TOKEN}` })]);
+
+  const events = eventsOf(cwd);
+  assert.match(events, /"type":"gate-answer"/, 'mutant: no gate-answer event was recorded');
+  assert.ok(
+    events.includes(FAKE_TOKEN),
+    'with the redaction removed the raw token should survive into events.jsonl; it did not, so the redaction test above is not what stops it',
+  );
 });
 
 // ---------------------------------------------------------------------------

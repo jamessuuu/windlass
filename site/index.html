@@ -1,0 +1,221 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>windlass: a pipeline runner with no model inside it</title>
+<!-- gen:head -->
+<meta name="description" content="windlass runs pipelines as typed graphs with verifier edges and human gates, with no model inside the runner, and every run replays as one static HTML file.">
+<link rel="canonical" href="https://windlass-runner.vercel.app/">
+<meta property="og:type" content="website">
+<meta property="og:title" content="windlass: a pipeline runner with no model inside it">
+<meta property="og:description" content="windlass runs pipelines as typed graphs with verifier edges and human gates, with no model inside the runner, and every run replays as one static HTML file.">
+<meta property="og:url" content="https://windlass-runner.vercel.app/">
+<meta property="og:image" content="https://windlass-runner.vercel.app/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="windlass: a pipeline runner with no model inside it">
+<meta name="twitter:description" content="windlass runs pipelines as typed graphs with verifier edges and human gates, with no model inside the runner, and every run replays as one static HTML file.">
+<meta name="twitter:image" content="https://windlass-runner.vercel.app/og.png">
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"WebSite","name":"windlass","url":"https://windlass-runner.vercel.app/","description":"windlass runs pipelines as typed graphs with verifier edges and human gates, with no model inside the runner, and every run replays as one static HTML file."},{"@type":"SoftwareApplication","name":"windlass","applicationCategory":"DeveloperApplication","operatingSystem":"Node.js","description":"windlass runs pipelines as typed graphs with verifier edges and human gates, with no model inside the runner, and every run replays as one static HTML file.","url":"https://windlass-runner.vercel.app/","license":"https://opensource.org/license/mit","codeRepository":"https://github.com/jamessuuu/windlass","author":{"@type":"Person","name":"James Lorenz Santos","url":"https://agentjames.vercel.app/"}}]}</script>
+<!-- /gen:head -->
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="icon" href="/favicon.ico" sizes="32x32">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+<div class="page">
+
+<header class="masthead">
+  <p class="wordmark"><a href="/">windlass</a><span class="tag">a pipeline runner with no model inside it</span></p>
+  <nav aria-label="Sections">
+    <a href="#replay">Replay</a>
+    <a href="#run">Run it</a>
+    <a href="#receipts">Receipts</a>
+    <a href="https://github.com/jamessuuu/windlass">Source</a>
+  </nav>
+</header>
+
+<main id="main">
+
+<section class="finding" aria-labelledby="finding-h">
+  <p class="kicker">Finding</p>
+  <h1 id="finding-h">Three things this pipeline runner refuses to do, and the test that proves each.</h1>
+  <p class="lede">windlass runs a pipeline written as a graph: script nodes, agent nodes and human gates, joined by edges that only advance when a verify command exits 0. The runner starts processes, reads exit codes, enforces caps and appends to a log. That is all it does. The three refusals below are the product, and each one has a receipt you can run.</p>
+
+  <ol class="refusals">
+    <li class="refusal">
+      <h2>It will not run a model inside the runner.</h2>
+      <p>There is no model call in <code>src/runner.mjs</code> and nothing to make one with: <code>package.json</code> declares <!-- gen:deps -->0<!-- /gen:deps --> runtime dependencies. An agent node is a spawned <code>claude -p</code> child process, checked the way a script is checked: by its exit code, by whether the files it promised now exist, and against a USD cap the runner passes down. The selftest runs a whole graph with zero model calls.</p>
+      <dl class="receipt">
+        <dt>Tests</dt>
+        <dd><code class="t">the runner has no model inside it: zero dependencies, no HTTP client, no model SDK</code> and <code class="t">an agent node is a spawned claude process, checked like a script</code> in <code>tests/no-model.test.mjs</code></dd>
+        <dt>Command</dt>
+        <dd><code>npm test</code></dd>
+      </dl>
+    </li>
+
+    <li class="refusal">
+      <h2>It will not proceed past a human gate.</h2>
+      <p>A gate node writes its question to disk and the process exits with code 3. Nothing times out into an assumed answer; only <code>answer</code> followed by <code>resume</code> moves the run forward. A declared cap that trips (<code>stall</code>, <code>budget-while-working</code>, <code>cap:attempts</code>, <code>cap:wall</code>, <code>cap:usd</code>) halts with the same code and a named reason. Exit 3 is never an error. It is the runner refusing to answer for you.</p>
+      <dl class="receipt">
+        <dt>Tests</dt>
+        <dd><code class="t">exit 3: the run stops at the gate and waits for a human</code> in <code>tests/redaction.test.mjs</code>; selftest checks <code class="t">run pauses at gate (exit 3)</code> and <code class="t">paused at gate1</code> in <code>src/runner.mjs</code></dd>
+        <dt>Command</dt>
+        <dd><code>npm test</code>, or the five lines under <a href="#run">Run it yourself</a></dd>
+      </dl>
+    </li>
+
+    <li class="refusal">
+      <h2>It will not leak a planted secret.</h2>
+      <p>The event log records a hash of everything a node produces and never the contents, so a replay of a client engagement carries no client material. Gate answers are the one value logged in full, because the decision a human made is the fact an attended replay exists to show. So every string inside an answer is redacted before it is written, and that promise is tested against the real runner, not a mock:</p>
+      <ol class="steps">
+        <li>A GitHub-token-shaped string was planted inside a gate answer. The test asserts it never reaches <code>events.jsonl</code>, and that the decision itself, <code>{"ok": true}</code>, still does.</li>
+        <li>Then the redaction was removed and the same scenario was run again. The token came through, which is the test failing for the right reason. That control is now a permanent test: a copy of the runner with the redaction line deleted must let the token survive, or the suite fails.</li>
+      </ol>
+      <p>The limit, stated: the redaction knows <!-- gen:shape-count -->11<!-- /gen:shape-count --> token shapes, listed under <a href="#receipts">Receipts</a>, and it only sees what <code>answer_schema</code> admits. A schema that accepts free text can accept anything.</p>
+      <dl class="receipt">
+        <dt>Tests</dt>
+        <dd><code class="t">a secret planted in a gate answer never reaches events.jsonl</code>, <code class="t">the human decision itself still survives, or the replay shows nothing</code> and <code class="t">negative control: with the redaction removed, the planted token survives, so the first test must fail without it</code> in <code>tests/redaction.test.mjs</code></dd>
+        <dt>Command</dt>
+        <dd><code>npm test</code></dd>
+      </dl>
+    </li>
+  </ol>
+</section>
+
+<section id="replay" aria-labelledby="replay-h">
+  <p class="kicker">Replay</p>
+  <h2 id="replay-h">The run, as it was recorded</h2>
+  <p>Below is part of <a href="/demo-replay">the demo replay</a>: the rendered output of a real run of <code>examples/demo/pipeline.graph.json</code> through <code>run</code>, <code>answer</code>, <code>resume</code>, <code>replay</code> and <code>view</code>. Nothing on it was typed by hand. <code>bin/build-site.mjs</code> re-renders it from the committed run data with the same <code>windlass view</code> command and copies it here, and <code>tests/site.test.mjs</code> fails if the copy and <code>examples/demo-replay.html</code> differ by one byte.</p>
+  <p>What to look for: <code>bump</code> needed <!-- gen:bump-attempts -->2<!-- /gen:bump-attempts --> attempts, because its outgoing edge's verify command failed the first time and the declared <code>on_fail</code> retry sent the run back to <code>seed</code>. Then <code>gate1</code> paused the run with exit 3, a human answered, and only then did it resume. <!-- gen:events -->34<!-- /gen:events --> events were recorded in all.</p>
+
+  <figure class="excerpt">
+    <figcaption>Run header, from state.json and events.jsonl</figcaption>
+    <!-- gen:replay-meta -->
+    <dl class="meta-head"><dt>graph</dt><dd>windlass-echo-demo (v1)</dd><dt>run id</dt><dd>demo</dd><dt>status</dt><dd><span class="badge badge-ok">done</span></dd><dt>halt reason</dt><dd>none</dd><dt>started at</dt><dd>2026-09-05T11:31:14.256Z</dd><dt>last event recorded at</dt><dd>2026-09-05T11:31:22.649Z</dd><dt>active wall time</dt><dd>1.06 s (1056 ms) <span class="muted">(recorded; excludes time paused at a human gate)</span></dd><dt>total cost</dt><dd>$0</dd><dt>current node</dt><dd>finish</dd><dt>nodes / edges declared</dt><dd>4 / 3</dd><dt>events recorded</dt><dd>34</dd></dl>
+<p class="muted">caps declared in graph: attended=true, max_wall_minutes=5, max_attempts_per_node=2, max_usd_total=1</p>
+    <!-- /gen:replay-meta -->
+  </figure>
+
+  <figure class="excerpt">
+    <figcaption>Nodes, final status</figcaption>
+    <!-- gen:replay-nodes -->
+    <div class="tablewrap"><table><thead><tr><th>id</th><th>kind</th><th>final status</th><th>attempts</th><th>last exit</th><th>duration</th><th>cost</th></tr></thead><tbody><tr><td><code>seed</code></td><td>script</td><td><span class="badge badge-ok">done</span></td><td>2</td><td>0 (pass)</td><td>142 ms</td><td>$0</td></tr><tr><td><code>bump</code></td><td>script</td><td><span class="badge badge-ok">done</span></td><td>2</td><td>0 (pass)</td><td>135 ms</td><td>$0</td></tr><tr><td><code>gate1</code></td><td>gate</td><td><span class="badge badge-ok">done</span></td><td>1</td><td>0 (pass)</td><td>0 ms</td><td>$0</td></tr><tr><td><code>finish</code></td><td>script</td><td><span class="badge badge-ok">done</span></td><td>1</td><td>0 (pass)</td><td>90 ms</td><td>$0</td></tr></tbody></table></div>
+    <!-- /gen:replay-nodes -->
+  </figure>
+
+  <figure class="excerpt">
+    <figcaption>The gate: paused, answered, resumed</figcaption>
+    <!-- gen:replay-gate -->
+    <details class="block" open><summary><span class="node-id"><code>gate1</code></span> <span class="kind-tag">gate</span> <span class="attempt-tag">attempt 1</span> <span class="badge badge-warn">paused — waiting on human</span><span class="ts">2026-09-05T11:31:15.130Z</span></summary>
+<div class="field"><div class="field-label">gate question</div><p>state.json has count&gt;=2 — confirm to proceed to finish?</p></div><div class="field"><div class="field-label">answer written to</div><code>gate1-answer.json</code></div><div class="field"><div class="field-label">reads (declared in graph, not read by the viewer)</div><code>state.json</code></div><div class="field"><div class="field-label">answer_schema (declared in graph)</div><pre class="code"><code>{
+  "type": "object",
+  "required": [
+    "ok"
+  ],
+  "properties": {
+    "ok": {
+      "type": "boolean"
+    }
+  }
+}</code></pre></div></details>
+<div class="control control-halt"><span class="ts">2026-09-05T11:31:15.132Z</span> — graph paused, halt reason: <strong>gate</strong></div>
+<div class="control control-answer"><span class="ts">2026-09-05T11:31:22.127Z</span> — a human answered gate <code>gate1</code>: <code>{"ok":true}</code></div>
+<div class="control control-resume"><span class="ts">2026-09-05T11:31:22.464Z</span> — resumed at gate <code>gate1</code></div>
+<details class="block" open><summary><span class="node-id"><code>gate1</code></span> <span class="kind-tag">gate</span> <span class="attempt-tag">attempt 2</span> <span class="badge badge-ok">0 (pass)</span><span class="ts">2026-09-05T11:31:22.466Z</span></summary>
+<div class="field"><div class="field-label">gate answered</div><p>at 2026-09-05T11:31:22.467Z, written to <code>gate1-answer.json</code></p></div><div class="field"><div class="field-label">the answer the human gave</div><pre class="code"><code>{
+  "ok": true
+}</code></pre></div>
+<div class="field-grid"><div><div class="field-label">exit code</div>0 (pass)</div><div><div class="field-label">duration</div>0 ms</div><div><div class="field-label">cost</div>$0</div></div>
+<div class="field"><div class="field-label">outgoing edge verify</div><div class="tablewrap"><table><thead><tr><th>edge</th><th>exit</th><th>duration</th></tr></thead><tbody><tr><td><code>gate1-&gt;finish</code></td><td>0 (pass)</td><td>90 ms</td></tr></tbody></table></div></div></details>
+    <!-- /gen:replay-gate -->
+  </figure>
+
+  <p class="cta-row"><a class="cta" href="/demo-replay">Open the full replay</a> <span class="muted">one file, <!-- gen:replay-kb -->16<!-- /gen:replay-kb --> KB, no JavaScript, no network requests; it passes <code>windlass view --check</code></span></p>
+</section>
+
+<section id="run" aria-labelledby="run-h">
+  <p class="kicker">Run it yourself</p>
+  <h2 id="run-h">Reproduce exit code 3</h2>
+  <p>Node <!-- gen:node-version -->22<!-- /gen:node-version --> or newer, zero runtime dependencies. The last line exits with code 3.</p>
+<pre><code>git clone https://github.com/jamessuuu/windlass
+cd windlass
+npm install
+mkdir try &amp;&amp; cp examples/echo/pipeline.graph.json try/
+node bin/windlass.mjs run try/pipeline.graph.json --run-id try --allow-nested</code></pre>
+  <p>It prints <code>GRAPH PAUSED, halt_reason: gate, current: gate1</code> and writes <code>try/gate1-answer.json.request.json</code>, the question a human is being asked. Read the exit code with <code>echo $?</code>, or <code>$LASTEXITCODE</code> in PowerShell. Nothing continues until you answer:</p>
+<pre><code>node bin/windlass.mjs answer try/pipeline.graph.json gate1 '{"ok":true}' --run-id try
+node bin/windlass.mjs resume try/pipeline.graph.json --run-id try --allow-nested
+node bin/windlass.mjs replay try/pipeline.graph.json --run-id try
+node bin/windlass.mjs view try/.graph-runner/try --out try/replay.html</code></pre>
+  <p><code>--allow-nested</code> is there because the runner refuses to start inside a live Claude Code session by default: a nested <code>claude -p</code> has been seen to hang. A script-only graph has nothing to spawn, but the runner cannot know that in advance. <code>npm test</code> runs the whole suite, selftest included.</p>
+</section>
+
+<section id="receipts" aria-labelledby="receipts-h">
+  <p class="kicker">Receipts</p>
+  <h2 id="receipts-h">Every number on this page, and where it came from</h2>
+  <p>Each value is written by <code>bin/build-site.mjs</code> from the file named beside it, and <code>tests/site.test.mjs</code> derives every one again and fails if the page disagrees. None is typed.</p>
+  <!-- gen:receipts -->
+  <div class="receipts-table"><table>
+    <thead><tr><th scope="col">What</th><th scope="col">Value</th><th scope="col">Artifact</th><th scope="col">Regenerate with</th></tr></thead>
+    <tbody>
+      <tr><th scope="row">Selftest checks passed</th><td class="n">25 / 25</td><td><code>src/runner.mjs, the selftest() function</code></td><td><code>npm run selftest</code></td></tr>
+      <tr><th scope="row">Tests in the suite</th><td class="n">41 (no-model 2, redaction 7, site 14, viewer 18)</td><td><code>tests/*.test.mjs, one test() each</code></td><td><code>npm test</code></td></tr>
+      <tr><th scope="row">Runtime dependencies</th><td class="n">0</td><td><code>package.json, &quot;dependencies&quot;</code></td><td><code>node -e &quot;console.log(Object.keys(require('./package.json').dependencies||{}).length)&quot;</code></td></tr>
+      <tr><th scope="row">Nodes and edges in the demo graph</th><td class="n">4 nodes, 3 edges</td><td><code>examples/demo/pipeline.graph.json</code></td><td><code>node bin/windlass.mjs validate examples/demo/pipeline.graph.json</code></td></tr>
+      <tr><th scope="row">Human gates in the demo graph</th><td class="n">1</td><td><code>examples/demo/pipeline.graph.json, nodes with kind &quot;gate&quot;</code></td><td><code>same as above</code></td></tr>
+      <tr><th scope="row">Events recorded in the demo run</th><td class="n">34</td><td><code>examples/demo/.graph-runner/demo/events.jsonl, one line each</code></td><td><code>node bin/windlass.mjs replay examples/demo/pipeline.graph.json --run-id demo</code></td></tr>
+      <tr><th scope="row">Attempts the bump node needed</th><td class="n">2</td><td><code>examples/demo/.graph-runner/demo/state.json, nodes.bump.attempts</code></td><td><code>same as above</code></td></tr>
+      <tr><th scope="row">Active runner time</th><td class="n">1056 ms, excluding time paused at the gate</td><td><code>state.json, active_ms</code></td><td><code>same as above</code></td></tr>
+      <tr><th scope="row">Total cost</th><td class="n">$0, measured (script nodes cost nothing)</td><td><code>state.json, usd_total</code></td><td><code>same as above</code></td></tr>
+      <tr><th scope="row">The answer the human gave</th><td class="n">{&quot;ok&quot;:true}</td><td><code>events.jsonl, the gate-answer event</code></td><td><code>same as above</code></td></tr>
+      <tr><th scope="row">Token shapes the redaction knows</th><td class="n">11</td><td><code>src/runner.mjs, SECRET_PATTERNS</code></td><td><code>listed below</code></td></tr>
+      <tr><th scope="row">Replay page</th><td class="n">16 KB, one file, no script, no remote resource</td><td><code>examples/demo-replay.html</code></td><td><code>node bin/windlass.mjs view examples/demo/.graph-runner/demo --out examples/demo-replay.html, then node src/viewer.mjs --check examples/demo-replay.html</code></td></tr>
+    </tbody>
+  </table></div>
+  <!-- /gen:receipts -->
+  <h3>Token shapes the redaction knows</h3>
+  <p>From <code>SECRET_PATTERNS</code> in <code>src/runner.mjs</code>. Each pattern is built by string concatenation so the source never contains a token-shaped literal itself.</p>
+  <!-- gen:shapes -->
+  <ol class="shapes">
+    <li>github token</li>
+    <li>github oauth</li>
+    <li>github fine-grained PAT</li>
+    <li>anthropic key</li>
+    <li>openai-style key</li>
+    <li>aws access key</li>
+    <li>slack token</li>
+    <li>google api key</li>
+    <li>telegram bot token</li>
+    <li>private key block</li>
+    <li>stripe live key</li>
+  </ol>
+  <!-- /gen:shapes -->
+</section>
+
+<section id="limits" aria-labelledby="limits-h">
+  <p class="kicker">Limits</p>
+  <h2 id="limits-h">What this page does not show</h2>
+  <ul class="limits">
+    <li>One fixture graph of <!-- gen:nodes -->4<!-- /gen:nodes --> nodes, script-only. Nothing here claims the design holds at fifty nodes or with many agent nodes; the runner has not been run at that scale.</li>
+    <li>The demo's cost column reads $0 because script nodes cost nothing and the runner measured zero. A field the log never recorded renders as "not recorded", never as 0; that rule has its own tests in <code>tests/viewer.test.mjs</code>.</li>
+    <li>The redaction is a list of token shapes, not an understanding of secrets. Keep <code>answer_schema</code> narrow.</li>
+    <li>The replay viewer has been read on desktop and in print. It has not been tested with a screen reader.</li>
+    <li>Exercised on Windows with Git Bash and PowerShell. Not yet on Linux or macOS.</li>
+  </ul>
+</section>
+
+</main>
+
+<footer>
+  <!-- attribution: the shared "made by James" kit (~/.claude/harness-dist/attribution) did not exist when this page was built; this slot is the plain form and is meant to be replaced by it. -->
+  <p>Built by <a href="https://agentjames.vercel.app/">James Lorenz Santos</a>. Source and tests at <a href="https://github.com/jamessuuu/windlass">github.com/jamessuuu/windlass</a>. MIT.</p>
+  <p>Demo run recorded <!-- gen:run-date --><time datetime="2026-09-05T11:31:14.256Z">2026-09-05</time><!-- /gen:run-date -->. This page has no JavaScript and makes no network requests of its own.</p>
+</footer>
+
+</div>
+</body>
+</html>

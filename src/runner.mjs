@@ -877,7 +877,12 @@ function selftest() {
   const base = join(tmpdir(), 'graph-runner-selftest-' + Date.now());
   mkdirSync(base, { recursive: true });
   let failed = 0;
+  // Counted as checks run, never typed: an earlier version hardcoded the
+  // total, four checks were added later, and the summary line kept printing
+  // 21/21 while 25 checks ran. The site and the docs read this number.
+  let total = 0;
   const check = (name, ok, detail) => {
+    total++;
     console.log(`${ok ? 'ok  ' : 'FAIL'}  ${name}`);
     if (!ok) { failed++; if (detail) console.log(`      ${String(detail).slice(0, 400)}`); }
   };
@@ -1001,7 +1006,6 @@ function selftest() {
 
   try { rmSync(base, { recursive: true, force: true }); } catch { /* best-effort cleanup */ }
 
-  const total = 21;
   console.log(`\ngraph-runner selftest: ${total - failed}/${total} passed${failed ? ' — FAILURES ABOVE' : ''}`);
   process.exit(failed ? 1 : 0);
 }
