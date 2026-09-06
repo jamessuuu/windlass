@@ -178,7 +178,16 @@ test('no script runs on the page, and nothing is fetched from another origin', (
   const html = page();
   const scripts = [...html.matchAll(/<script\b[^>]*>/g)].map((m) => m[0]);
   for (const s of scripts) assert.match(s, /type="application\/ld\+json"/, `a runnable script tag is on the page: ${s}`);
-  assert.doesNotMatch(html, /\b(?:src|href)="(?:https?:)?\/\/(?!github\.com|agentjames\.vercel\.app|windlass-runner\.vercel\.app|schema\.org|opensource\.org)/, 'a remote resource or link to an unexpected host');
+  // www.linkedin.com joined this list on 2026-09-06 with the attribution kit.
+  // agentjames.vercel.app -- the kit's other link -- was already allowed, so
+  // the allowlist simply predated the kit's second link rather than objecting
+  // to it. Checked before widening: LinkedIn appears exactly once, as an
+  // <a href> with rel="me noopener", and zero times in a src= or <link>. So
+  // nothing is FETCHED from it and this test's actual promise still holds.
+  // The regex covers href too, which means it polices outbound anchors as well
+  // as resource loads; that is the stricter reading and worth keeping, but it
+  // is why an ordinary hyperlink needs an entry here at all.
+  assert.doesNotMatch(html, /\b(?:src|href)="(?:https?:)?\/\/(?!github\.com|agentjames\.vercel\.app|windlass-runner\.vercel\.app|www\.linkedin\.com|schema\.org|opensource\.org)/, 'a remote resource or link to an unexpected host');
   assert.doesNotMatch(html, /<link[^>]+href="https?:\/\/(?!windlass-runner\.vercel\.app\/)/, 'a stylesheet or asset is loaded from another origin');
 });
 
