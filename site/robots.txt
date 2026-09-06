@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://windlass-runner.vercel.app/sitemap.xml
+Sitemap: https://windlass-lyart.vercel.app/sitemap.xml

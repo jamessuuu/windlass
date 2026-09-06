@@ -4,6 +4,6 @@
 
 One page and one artifact. The page leads with what the runner refuses to do and names the test behind each refusal; the artifact is the rendered replay of a real run.
 
-- [The finding, the replay excerpt, and how to reproduce exit code 3](https://windlass-runner.vercel.app/)
-- [Replay of the demo run, one static file](https://windlass-runner.vercel.app/demo-replay)
+- [The finding, the replay excerpt, and how to reproduce exit code 3](https://windlass-lyart.vercel.app/)
+- [Replay of the demo run, one static file](https://windlass-lyart.vercel.app/demo-replay)
 - [Source, tests and README](https://github.com/jamessuuu/windlass)

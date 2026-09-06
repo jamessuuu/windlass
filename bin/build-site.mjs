@@ -37,7 +37,7 @@ const DEMO_REPLAY = join(ROOT, 'examples', 'demo-replay.html');
 const SITE_REPLAY = join(SITE, 'demo-replay.html');
 
 /** Production origin. One place. Change it here if the hostname differs. */
-export const SITE_ORIGIN = 'https://windlass-runner.vercel.app';
+export const SITE_ORIGIN = 'https://windlass-lyart.vercel.app';
 export const REPO_URL = 'https://github.com/jamessuuu/windlass';
 export const PORTFOLIO_URL = 'https://agentjames.vercel.app/';
 export const TITLE = 'windlass: a pipeline runner with no model inside it';

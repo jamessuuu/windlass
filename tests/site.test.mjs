@@ -187,8 +187,8 @@ test('no script runs on the page, and nothing is fetched from another origin', (
   // The regex covers href too, which means it polices outbound anchors as well
   // as resource loads; that is the stricter reading and worth keeping, but it
   // is why an ordinary hyperlink needs an entry here at all.
-  assert.doesNotMatch(html, /\b(?:src|href)="(?:https?:)?\/\/(?!github\.com|agentjames\.vercel\.app|windlass-runner\.vercel\.app|www\.linkedin\.com|schema\.org|opensource\.org)/, 'a remote resource or link to an unexpected host');
-  assert.doesNotMatch(html, /<link[^>]+href="https?:\/\/(?!windlass-runner\.vercel\.app\/)/, 'a stylesheet or asset is loaded from another origin');
+  assert.doesNotMatch(html, /\b(?:src|href)="(?:https?:)?\/\/(?!github\.com|agentjames\.vercel\.app|windlass-lyart.vercel.app|www\.linkedin\.com|schema\.org|opensource\.org)/, 'a remote resource or link to an unexpected host');
+  assert.doesNotMatch(html, /<link[^>]+href="https?:\/\/(?!windlass-lyart.vercel.app\/)/, 'a stylesheet or asset is loaded from another origin');
 });
 
 test('every internal link and asset on the page resolves to a file under site/', () => {
