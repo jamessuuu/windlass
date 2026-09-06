@@ -186,8 +186,12 @@ p { margin: 0 0 1em; }
   margin: 12px 0 8px;
   padding: 12px 16px;
   background: var(--sheet);
+  /* No accent bar. This carried a 3px signal-coloured left edge, which is the
+     most recognisable tell of a generated UI, and unlike .control below the
+     colour here encoded nothing -- every receipt got the same one. The sheet
+     background and the 1px rule already separate it from the prose, which is
+     how every other block on this page earns its separation. */
   border: 1px solid var(--rule);
-  border-left: 3px solid var(--signal);
   max-width: var(--measure);
   font-size: 1rem;
 }
