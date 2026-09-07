@@ -243,6 +243,7 @@ export function receiptsHtml(f) {
   return [
     '',
     '  <div class="receipts-table"><table>',
+    '    <colgroup><col class="c-what"><col class="c-value"><col class="c-artifact"><col class="c-how"></colgroup>',
     '    <thead><tr><th scope="col">What</th><th scope="col">Value</th><th scope="col">Artifact</th><th scope="col">Regenerate with</th></tr></thead>',
     '    <tbody>',
     ...rows.map(([what, value, artifact, how]) => `      <tr><th scope="row">${esc(what)}</th><td class="n">${esc(value)}</td><td><code>${esc(artifact)}</code></td><td><code>${esc(how)}</code></td></tr>`),

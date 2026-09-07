@@ -547,11 +547,29 @@ details.block[open] > summary { border-bottom: 1px solid var(--rule); }
 
 /* ------------------------------------------------------------------ receipts */
 .receipts-table { overflow-x: auto; margin: 0 0 1.4em; border: 1px solid var(--rule); border-radius: var(--radius); background: var(--sheet); box-shadow: var(--depth-edge), var(--elev-1); }
-.receipts-table table { border-collapse: collapse; width: 100%; font-size: 0.89rem; }
+/* min-width, not width:100% alone. At 390px the four columns squeezed to a
+   few characters each and every artifact path wrapped into a column of
+   single words: the receipts section alone measured 15,096px tall, which is
+   most of a 25,066px page. The table scrolls inside its own box instead
+   (which .receipts-table's overflow-x has always been there to do). */
+.receipts-table table { border-collapse: collapse; table-layout: fixed; width: 100%; min-width: 760px; font-size: 0.89rem; }
 .receipts-table th, .receipts-table td { text-align: left; padding: 0.55rem 0.7rem; border-bottom: 1px solid var(--rule); vertical-align: top; overflow-wrap: anywhere; }
+/* The row headers are ordinary prose, so they must not break mid-word.
+   overflow-wrap: anywhere told the layout their min-content width was one
+   character, and auto table layout duly gave the "what" column ~55px and the
+   "value" column 423px of the same 720px table. Explicit widths, and normal
+   wrapping on the header itself. */
+.receipts-table th[scope="row"] { overflow-wrap: normal; }
+.receipts-table col.c-what { width: 22%; }
+.receipts-table col.c-value { width: 26%; }
+.receipts-table col.c-artifact { width: 26%; }
+.receipts-table col.c-how { width: 26%; }
 .receipts-table th { font-family: var(--mono); font-size: 0.79rem; letter-spacing: 0.05em; text-transform: uppercase; color: var(--muted); }
 .receipts-table tr:last-child td { border-bottom: 0; }
-.receipts-table td.n { font-family: var(--mono); font-weight: 700; white-space: nowrap; }
+/* white-space: normal, not nowrap. Under table-layout: fixed a nowrap value
+   simply ran out of its cell and over the artifact column beside it (seen at
+   1440: "41 (no-model 2, redaction 7" clipped mid-word). */
+.receipts-table td.n { font-family: var(--mono); font-weight: 700; white-space: normal; }
 .shapes { columns: 2; column-gap: 32px; padding-left: 1.2em; margin: 0 0 1em; font-family: var(--mono); font-size: 0.89rem; }
 .shapes li { break-inside: avoid; }
 
