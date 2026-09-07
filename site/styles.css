@@ -538,10 +538,10 @@ details.block[open] > summary { border-bottom: 1px solid var(--rule); }
 .field-label { font-family: var(--mono); font-size: 0.70rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.25em; }
 .field-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.6rem; padding: 0.65rem 0.8rem; font-size: 0.89rem; }
 .excerpt pre.code { margin: 0 0 0.5em; padding: 0.6rem 0.8rem; font-size: 0.79rem; background: var(--code-bg); border-color: var(--rule); }
-.control { padding: 0.45rem 0.8rem; margin: 0 0 0.8em; border-left: 3px solid var(--rule-strong); font-family: var(--mono); font-size: 0.89rem; color: var(--muted); }
+.control { padding: 0.45rem 0.8rem; margin: 0 0 0.8em; border: 1px solid var(--rule); border-radius: 8px; background: color-mix(in oklab, var(--rule-strong) 7%, transparent); font-family: var(--mono); font-size: 0.89rem; color: var(--muted); }
 .control .ts { margin: 0; }
-.control-halt { border-left-color: var(--warn); }
-.control-answer { border-left-color: var(--ok); }
+.control-halt { border-color: color-mix(in oklab, var(--warn) 42%, var(--rule)); background: color-mix(in oklab, var(--warn) 10%, transparent); }
+.control-answer { border-color: color-mix(in oklab, var(--ok) 42%, var(--rule)); background: color-mix(in oklab, var(--ok) 10%, transparent); }
 .control-resume { border-left-color: var(--signal); }
 .control strong { color: var(--ink); }
 
