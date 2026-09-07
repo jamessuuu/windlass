@@ -40,13 +40,36 @@
 
 <main id="main">
 
-<section class="finding" aria-labelledby="finding-h">
-  <p class="kicker">Finding</p>
-  <h1 id="finding-h">Three things this pipeline runner refuses to do, and the test that proves each.</h1>
-  <p class="lede">windlass runs a pipeline written as a graph: script nodes, agent nodes and human gates, joined by edges that only advance when a verify command exits 0. The runner starts processes, reads exit codes, enforces caps and appends to a log. That is all it does. The three refusals below are the product, and each one has a receipt you can run.</p>
+<section class="finding hero" aria-labelledby="finding-h">
+  <div class="hero-grid">
+    <div class="rise">
+      <p class="kicker">Finding</p>
+      <h1 id="finding-h">Three things this pipeline runner refuses to do, and the test that proves each.</h1>
+      <p class="lede">A pipeline is a graph: script nodes, agent nodes and human gates, joined by edges that only advance when a verify command exits 0. The runner starts processes, reads exit codes, enforces caps and appends to a log. That is all it does.</p>
+      <p class="cta-row"><a class="cta" href="/demo-replay">Open the recorded run</a> <a class="cta cta-quiet" href="#run">Run it yourself</a></p>
+    </div>
+
+    <figure class="graphcard rise rise-2" aria-labelledby="graph-cap">
+      <figcaption id="graph-cap">The demo graph, as declared</figcaption>
+      <ol class="flow">
+        <li class="node"><span class="node-name">seed</span><span class="node-kind">script</span><span class="badge badge-ok">exit 0</span></li>
+        <li class="edge"><span>edge verify</span></li>
+        <li class="node node-retry"><span class="node-name">bump</span><span class="node-kind">script</span><span class="badge badge-warn">retried</span></li>
+        <li class="edge"><span>edge verify</span></li>
+        <li class="node node-gate"><span class="node-name">gate1</span><span class="node-kind">gate</span><span class="badge badge-signal">exit 3, waits</span></li>
+        <li class="edge edge-human"><span>a human answered</span></li>
+        <li class="node"><span class="node-name">finish</span><span class="node-kind">script</span><span class="badge badge-ok">exit 0</span></li>
+      </ol>
+      <ul class="legend">
+        <li><i class="sw-ok"></i>edge verified</li>
+        <li><i class="sw-warn"></i>retry on fail</li>
+        <li><i class="sw-signal"></i>human gate</li>
+      </ul>
+    </figure>
+  </div>
 
   <ol class="refusals">
-    <li class="refusal">
+    <li class="refusal" id="refusal-1">
       <h2>It will not run a model inside the runner.</h2>
       <p>There is no model call in <code>src/runner.mjs</code> and nothing to make one with: <code>package.json</code> declares <!-- gen:deps -->0<!-- /gen:deps --> runtime dependencies. An agent node is a spawned <code>claude -p</code> child process, checked the way a script is checked: by its exit code, by whether the files it promised now exist, and against a USD cap the runner passes down. The selftest runs a whole graph with zero model calls.</p>
       <dl class="receipt">
@@ -57,7 +80,7 @@
       </dl>
     </li>
 
-    <li class="refusal">
+    <li class="refusal" id="refusal-2">
       <h2>It will not proceed past a human gate.</h2>
       <p>A gate node writes its question to disk and the process exits with code 3. Nothing times out into an assumed answer; only <code>answer</code> followed by <code>resume</code> moves the run forward. A declared cap that trips (<code>stall</code>, <code>budget-while-working</code>, <code>cap:attempts</code>, <code>cap:wall</code>, <code>cap:usd</code>) halts with the same code and a named reason. Exit 3 is never an error. It is the runner refusing to answer for you.</p>
       <dl class="receipt">
@@ -68,7 +91,7 @@
       </dl>
     </li>
 
-    <li class="refusal">
+    <li class="refusal" id="refusal-3">
       <h2>It will not leak a planted secret.</h2>
       <p>The event log records a hash of everything a node produces and never the contents, so a replay of a client engagement carries no client material. Gate answers are the one value logged in full, because the decision a human made is the fact an attended replay exists to show. So every string inside an answer is redacted before it is written, and that promise is tested against the real runner, not a mock:</p>
       <ol class="steps">
