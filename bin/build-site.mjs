@@ -43,6 +43,23 @@ export const PORTFOLIO_URL = 'https://agentjames.vercel.app/';
 export const TITLE = 'windlass: a pipeline runner with no model inside it';
 
 /**
+ * The maker as one Person entity. Same @id and sameAs as agentjames publishes
+ * (register R15/R17 there), so engines can join this site to that entity.
+ */
+export const AUTHOR = {
+  '@type': 'Person',
+  '@id': 'https://agentjames.vercel.app/#person',
+  name: 'James Lorenz Santos',
+  url: 'https://agentjames.vercel.app',
+  sameAs: [
+    'https://www.linkedin.com/in/james-lorenz-santos-720776251/',
+    'https://github.com/jamessuuu',
+    'https://www.onlinejobs.ph/jobseekers/info/2766463',
+    'https://ph.jobstreet.com/profiles/jameslorenz-santos-SXdpKyGqdK',
+  ],
+};
+
+/**
  * The one sentence that says what this is. Byte-identical in the page's meta
  * description, its JSON-LD, llms.txt, and the first line of README.md;
  * tests/site.test.mjs checks all four.
@@ -191,7 +208,7 @@ export function headHtml() {
   const jsonld = {
     '@context': 'https://schema.org',
     '@graph': [
-      { '@type': 'WebSite', name: 'windlass', url: `${SITE_ORIGIN}/`, description: CANONICAL_SENTENCE },
+      { '@type': 'WebSite', name: 'windlass', url: `${SITE_ORIGIN}/`, description: CANONICAL_SENTENCE, author: AUTHOR },
       {
         '@type': 'SoftwareApplication',
         name: 'windlass',
@@ -201,7 +218,7 @@ export function headHtml() {
         url: `${SITE_ORIGIN}/`,
         license: 'https://opensource.org/license/mit',
         codeRepository: REPO_URL,
-        author: { '@type': 'Person', name: 'James Lorenz Santos', url: PORTFOLIO_URL },
+        author: AUTHOR,
       },
     ],
   };

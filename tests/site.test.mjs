@@ -182,12 +182,15 @@ test('no script runs on the page, and nothing is fetched from another origin', (
   // agentjames.vercel.app -- the kit's other link -- was already allowed, so
   // the allowlist simply predated the kit's second link rather than objecting
   // to it. Checked before widening: LinkedIn appears exactly once, as an
-  // <a href> with rel="me noopener", and zero times in a src= or <link>. So
-  // nothing is FETCHED from it and this test's actual promise still holds.
+  // <a href> with rel="me", and zero times in a src= or <link>. So nothing is
+  // FETCHED from it and this test's actual promise still holds.
+  // www.onlinejobs.ph and ph.jobstreet.com joined on 2026-09-12 the same way
+  // (register R15/R17): each is one <a href rel="me"> in the maker line and
+  // nothing else, checked the same way before widening.
   // The regex covers href too, which means it polices outbound anchors as well
   // as resource loads; that is the stricter reading and worth keeping, but it
   // is why an ordinary hyperlink needs an entry here at all.
-  assert.doesNotMatch(html, /\b(?:src|href)="(?:https?:)?\/\/(?!github\.com|agentjames\.vercel\.app|windlass-lyart\.vercel\.app|www\.linkedin\.com|schema\.org|opensource\.org)/, 'a remote resource or link to an unexpected host');
+  assert.doesNotMatch(html, /\b(?:src|href)="(?:https?:)?\/\/(?!github\.com|agentjames\.vercel\.app|windlass-lyart\.vercel\.app|www\.linkedin\.com|www\.onlinejobs\.ph|ph\.jobstreet\.com|schema\.org|opensource\.org)/, 'a remote resource or link to an unexpected host');
   assert.doesNotMatch(html, /<link[^>]+href="https?:\/\/(?!windlass-lyart\.vercel\.app\/)/, 'a stylesheet or asset is loaded from another origin');
 });
 
